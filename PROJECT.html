@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Machine Learning Code</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 800px;
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      pre {
+        background-color: #f8f8f8;
+        padding: 20px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+      code {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 14px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Machine Learning Code</h1>
+
+      <!-- Load EDA Pkgs -->
+      <h2>Load EDA Packages</h2>
+      <pre><code class="python">
+import pandas as pd
+import numpy as np
+import seaborn as sns
+    </code></pre>
+
+      <!-- Load Text Cleaning Pkgs -->
+      <h2>Load Text Cleaning Packages</h2>
+      <pre><code class="python">
+import neattext.functions as nfx
+import string
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+from nltk import pos_tag
+from nltk.corpus import wordnet
+from nltk.stem import WordNetLemmatizer
+import re
+from collections import Counter
+    </code></pre>
+
+      <!-- Load ML Pkgs -->
+      <h2>Load Machine Learning Packages</h2>
+      <pre><code class="python">
+from sklearn.linear_model import LogisticRegression
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.svm import SVC
+    </code></pre>
+
+      <!-- Load Data -->
+      <h2>Load Data</h2>
+      <pre><code class="python">
+df = pd.read_csv('/content/drive/MyDrive/CoVidSenti.csv')
+    </code></pre>
+
+      <!-- Exploratory Data Analysis -->
+      <h2>Exploratory Data Analysis</h2>
+      <pre><code class="python">
+<!-- Exploratory Data Analysis -->
+<h2>Exploratory Data Analysis</h2>
+<pre><code class="python">
+# Display the first few rows of the dataframe
+print(df.head())
+
+# Check the shape of the dataframe
+print("Shape of the dataframe:", df.shape)
+
+# Check the data types of columns
+print("Data types of columns:")
+print(df.dtypes)
+
+# Check for missing values
+print("Missing values:")
+print(df.isnull().sum())
+
+# Visualize the distribution of emotions
+import matplotlib.pyplot as plt
+plt.figure(figsize=(8, 6))
+df['Emotion'].value_counts().plot(kind='bar')
+plt.xlabel('Emotion')
+plt.ylabel('Count')
+plt.title('Distribution of Emotions')
+plt.show()
+</code></pre>
+
+    </code></pre>
+
+      <!-- Data Cleaning -->
+      <h2>Data Cleaning</h2>
+      <pre><code class="python">
+# Drop duplicates if any
+df.drop_duplicates(inplace=True)
+
+# Convert text to lowercase
+df['Clean_Text'] = df['Text'].str.lower()
+
+# Remove user handles
+df['Clean_Text'] = df['Clean_Text'].apply(nfx.remove_userhandles)
+
+# Remove special characters
+df['Clean_Text'] = df['Clean_Text'].apply(lambda x: re.sub(r'[^a-zA-Z\s]', '', x))
+
+# Remove stopwords
+stop_words = set(stopwords.words('english'))
+df['Clean_Text'] = df['Clean_Text'].apply(lambda x: ' '.join([word for word in x.split() if word not in stop_words]))
+</code></pre>
+
+      <!-- Text Preprocessing -->
+
+      <h2>Text Preprocessing</h2>
+      <pre><code class="python">
+# Tokenization
+from nltk.tokenize import word_tokenize
+df['tokens'] = df['Clean_Text'].apply(word_tokenize)
+
+# Lemmatization
+from nltk.stem import WordNetLemmatizer
+lemmatizer = WordNetLemmatizer()
+df['lemmatized'] = df['tokens'].apply(lambda x: [lemmatizer.lemmatize(word) for word in x])
+
+# Vectorization
+from sklearn.feature_extraction.text import TfidfVectorizer
+tfidf_vectorizer = TfidfVectorizer()
+tfidf_matrix = tfidf_vectorizer.fit_transform(df['lemmatized'])
+</code></pre>
+
+      <!-- Machine Learning Models -->
+      <h2>Machine Learning Models</h2>
+      <pre><code class="python">
+# Splitting the data into train and test sets
+X = tfidf_matrix
+y = df['Emotion']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Training and evaluating the model
+from sklearn.svm import SVC
+svm_model = SVC()
+svm_model.fit(X_train, y_train)
+y_pred = svm_model.predict(X_test)
+
+# Model evaluation
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+accuracy = accuracy_score(y_test, y_pred)
+classification_report = classification_report(y_test, y_pred)
+confusion_matrix = confusion_matrix(y_test, y_pred)
+
+print("Accuracy:", accuracy)
+print("Classification Report:\n", classification_report)
+print("Confusion Matrix:\n", confusion_matrix)
+</code></pre>
+
+      <!-- Results Interpretation -->
+      <h2>Results Interpretation</h2>
+      <pre><code class="python">
+# Displaying the most important features
+feature_names = tfidf_vectorizer.get_feature_names_out()
+coefficients = svm_model.coef_
+top_features = sorted(zip(coefficients[0], feature_names), reverse=True)[:10]
+
+print("Top 10 most important features:")
+for coef, feature in top_features:
+    print(feature)
+
+# Visualizing the confusion matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 6))
+sns.heatmap(confusion_matrix, annot=True, fmt='g', cmap='Blues')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
+</code></pre>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+    <script>
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>
